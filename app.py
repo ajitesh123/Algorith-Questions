@@ -1,18 +1,18 @@
-import datetime
-from flask import Flask, render_template
+from flask import Flask, render_template, request, session
+from flask_session import Session
 
-app=Flask(__name__)
+app = Flask(__name__)
 
-@app.route("/")
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
+notes = []
+
+@app.route("/", methods=["GET", "POST"])
 def index():
-    return render_template("index.html", headline="Home Page")
+    if request.method == "POST":
+        note = request.form.get("note")
+        notes.append(note)
 
-@app.route("/<string:name>")
-def hello(name):
-    return f"Hello, {name}!"
-
-@app.route("/isnewyear")
-def isnewyear():
-    now=datetime.datetime.now()
-    new_year=now.month==1 and now.day==1
-    return render_template("isyear.html", new_year=new_year)
+    return render_template("index.html", notes=notes)
